@@ -118,3 +118,106 @@ ORDER BY
     c.category_name, p.product_name
 
 
+EJERCICIO 11
+
+SELECT 
+    o.ship_country, 
+    o.order_id,
+    o.freight,
+    SUM(o.freight) OVER (PARTITION BY o.ship_country) AS total_shipping_cost_by_country
+FROM 
+    orders o
+ORDER BY 
+    o.ship_country ASC, o.order_id ASC;
+	
+
+???????????????????????????
+EJERCICIO 12
+ACA FALTA METERLE EL RANK A LA LISTA QUE ME DEVUELVE ESTA QUERY
+
+select
+c.customer_id,
+c.company_name,
+SUM(od.unit_price * od.quantity) over (partition by c.customer_id) as total_sales
+from customers c
+join orders o on c.customer_id = o.customer_id
+join order_details od on o.order_id = od.order_id
+order by total_sales desc
+
+
+EJERCICIO 13
+
+SELECT 
+    employee_id,
+    first_name || ' ' || last_name AS full_name,
+    hire_date,
+    RANK() OVER (ORDER BY hire_date ASC) AS hire_rank
+FROM 
+    employees
+	
+EJERCICIO 14
+
+select
+product_id,
+product_name,
+unit_price,
+RANK() over (order by unit_price desc) as unit_price_rank
+from products
+	
+EJERCICIO 15
+
+select 
+od.order_id,
+p.product_id,
+od.quantity,
+LAG(od.quantity, 1) over (order by od.order_id, p.product_id) as prevquantity
+from products p
+join order_details od on p.product_id = od.product_id
+
+
+EJERCICIO 16
+
+select
+o.order_id,
+o.order_date,
+o.customer_id,
+LAG(o.order_date, 1) over (order by o.customer_id, o.order_date)
+from orders o
+
+EJERCICIO 17
+
+SELECT 
+product_id, 
+product_name, 
+unit_price, 
+LAG(unit_price, 1) OVER (ORDER BY product_id) AS previous_price,
+unit_price - LAG(unit_price, 1) OVER (ORDER BY product_id) AS price_difference
+FROM products
+
+EJERCICIO 18
+
+select
+product_name,
+unit_price,
+LEAD(unit_price, 1) over (order by product_id) as nextprice
+from products p
+
+EJERCICIO 19
+
+SELECT 
+    category_name,
+    total_sales_by_category,
+    LEAD(total_sales_by_category) OVER (ORDER BY category_name) AS next_total_sales
+FROM (
+    SELECT 
+        c.category_name,
+        SUM(od.quantity * od.unit_price) AS total_sales_by_category
+    FROM 
+        products p
+    JOIN 
+        categories c ON p.category_id = c.category_id
+    JOIN 
+        order_details od ON p.product_id = od.product_id
+    GROUP BY 
+        c.category_name
+) AS category_sales
