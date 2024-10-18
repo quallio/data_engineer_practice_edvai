@@ -131,18 +131,25 @@ ORDER BY
     o.ship_country ASC, o.order_id ASC;
 	
 
-???????????????????????????
 EJERCICIO 12
-ACA FALTA METERLE EL RANK A LA LISTA QUE ME DEVUELVE ESTA QUERY
 
-select
-c.customer_id,
-c.company_name,
-SUM(od.unit_price * od.quantity) over (partition by c.customer_id) as total_sales
-from customers c
-join orders o on c.customer_id = o.customer_id
-join order_details od on o.order_id = od.order_id
-order by total_sales desc
+WITH TotalSales AS (
+    SELECT
+        c.customer_id,
+        c.company_name,
+        SUM(od.unit_price * od.quantity) AS total_sales
+    FROM
+        customers c
+    JOIN orders o ON c.customer_id = o.customer_id
+    JOIN order_details od ON o.order_id = od.order_id
+    GROUP BY 
+        c.customer_id, c.company_name
+)
+SELECT
+    *,
+    RANK() OVER (ORDER BY total_sales DESC) AS sales_rank
+FROM
+    TotalSales;
 
 
 EJERCICIO 13
